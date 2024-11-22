@@ -7,9 +7,7 @@ app.use(express.json());
 
 
 
-// Routes
-
-
+//Base rooute
 app.use('/api/users', userRoutes);
 
 

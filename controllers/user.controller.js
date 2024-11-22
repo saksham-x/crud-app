@@ -11,9 +11,9 @@ const createUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        if (!name || !email || !password) {
-            return errorResponse(res, 400, 'Validation error', 'All fields are required');
-        }
+        // if (!name || !email || !password) {
+        //     return errorResponse(res, 400, 'Validation error', 'All fields are required');
+        // }
 
         const user = await User.create({ name, email, password });
         return successResponse(res, 'user created successfully', user)
