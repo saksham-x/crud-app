@@ -1,6 +1,6 @@
 const express = require("express")
 const app = express();
-const userRoutes = require('./routes/userRoutes')
+const userRoutes = require('./routes/user.routes')
 
 //Middleware
 app.use(express.json());

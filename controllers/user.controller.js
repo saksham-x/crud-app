@@ -1,4 +1,9 @@
-const User = require('../models/userModel');
+const User = require('../models/user.model');
+const { errorResponse, successResponse } = require('../utils/response.utils');
+const statusCodes = require('../utils/statusCodes.utils');
+
+
+
 
 
 //creating a user 
@@ -6,20 +11,17 @@ const createUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Validate input
         if (!name || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
+            return errorResponse(res, 400, 'Validation error', 'All fields are required');
         }
 
-        // Save the user to the database
         const user = await User.create({ name, email, password });
-        res.status(201).json({ message: 'User created successfully', user });
+        return successResponse(res, 'user created successfully', user)
     } catch (error) {
-        // Handle duplicate email error or other database errors
         if (error.code === 11000) {
-            return res.status(400).json({ message: 'Email already exists' });
+            return errorResponse(res, 400, 'Validation error', 'Email already exists')
         }
-        res.status(500).json({ message: 'Server error', error: error.message });
+        return errorResponse(res, 500, 'Server error', error)
     }
 };
 
@@ -27,9 +29,11 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
     try {
         const users = await User.find(); // Fetch all users from the database
-        res.status(200).json(users);
+        //  res.status(200).json(users);
+        return successResponse(res, 'request processed successfully', users)
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        // res.status(500).json({ message: 'Server error', error: error.message });
+        return errorResponse(res, statusCodes.INTERNAL_SERVER_ERROR, 'failed to process request', error)
     }
 };
 
@@ -37,15 +41,16 @@ const getUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findById(id); // Fetch user by ID
+        const user = await User.findById(id);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            // return res.status(404).json({ message: 'User not found' });
+            return errorResponse(res, statusCodes.NOT_FOUND, 'User not found', null)
         }
 
         res.status(200).json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
     }
 };
 // Update a user by ID
@@ -62,12 +67,12 @@ const updateUser = async (req, res) => {
         );
 
         if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
-        res.status(200).json({ message: 'User updated successfully', updatedUser });
+        res.status(statusCodes.OK).json({ message: 'User updated successfully', updatedUser });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -80,12 +85,12 @@ const deleteUser = async (req, res) => {
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
         }
 
-        res.status(200).json({ message: 'User deleted successfully' });
+        res.status(statusCodes.OK).json({ message: 'User deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
     }
 };
 module.exports = { createUser, getUsers, getUserById, updateUser, deleteUser };
