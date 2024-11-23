@@ -19,9 +19,10 @@ const createUser = async (req, res) => {
         return successResponse(res, 'user created successfully', user)
     } catch (error) {
         if (error.code === 11000) {
-            return errorResponse(res, 400, 'Validation error', 'Email already exists')
+            return errorResponse(res, statusCodes.BAD_REQUEST, 'Validation error', 'Email already exists')
         }
-        return errorResponse(res, 500, 'Server error', error)
+        return errorResponse(res, statusCodes.INTERNAL_SERVER_ERROR, 'failed to process request', error)
+        // return errorResponse(res, 500, 'Server error', error)
     }
 };
 
@@ -44,13 +45,11 @@ const getUserById = async (req, res) => {
         const user = await User.findById(id);
 
         if (!user) {
-            // return res.status(404).json({ message: 'User not found' });
             return errorResponse(res, statusCodes.NOT_FOUND, 'User not found', null)
         }
-
-        res.status(200).json(user);
+        return successResponse(res, 'request processed successfully', user)
     } catch (error) {
-        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
+        return errorResponse(res, statusCodes.INTERNAL_SERVER_ERROR, 'Server error', error.message);
     }
 };
 // Update a user by ID
@@ -63,16 +62,16 @@ const updateUser = async (req, res) => {
         const updatedUser = await User.findByIdAndUpdate(
             id,
             { name, email, password },
-            { new: true, runValidators: true } // Return updated user and validate
+            { new: true, runValidators: true }
         );
 
         if (!updatedUser) {
-            return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
+            return errorResponse(res, statusCodes.NOT_FOUND, 'User not found', null);
         }
 
-        res.status(statusCodes.OK).json({ message: 'User updated successfully', updatedUser });
+        return successResponse(res, 'User updated successfully', updatedUser);
     } catch (error) {
-        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
+        return errorResponse(res, statusCodes.INTERNAL_SERVER_ERROR, 'Server error', 'An unexpected error occurred');
     }
 };
 
@@ -85,12 +84,12 @@ const deleteUser = async (req, res) => {
         const deletedUser = await User.findByIdAndDelete(id);
 
         if (!deletedUser) {
-            return res.status(statusCodes.NOT_FOUND).json({ message: 'User not found' });
+            return errorResponse(res, statusCodes.NOT_FOUND, 'User not found', null);
         }
 
-        res.status(statusCodes.OK).json({ message: 'User deleted successfully' });
+        return successResponse(res, 'User deleted successfully', { id: deletedUser._id });
     } catch (error) {
-        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Server error', error: error.message });
+        return errorResponse(res, statusCodes.INTERNAL_SERVER_ERROR, 'Server error', 'An unexpected error occurred');
     }
 };
 module.exports = { createUser, getUsers, getUserById, updateUser, deleteUser };
