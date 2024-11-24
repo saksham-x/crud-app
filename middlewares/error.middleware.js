@@ -8,6 +8,16 @@ const errorMiddleware = (err, req, res, next) => {
         return errorResponse(res, err.status, err.message, err.details || null)
 
     }
+
+    if (err.name === 'ValidationError') {
+        return errorResponse(
+            res,
+            statusCodes.BAD_REQUEST,
+            'Validation error',
+            err.message
+
+        )
+    }
     return errorResponse(
         res,
         statusCodes.INTERNAL_SERVER_ERROR,
